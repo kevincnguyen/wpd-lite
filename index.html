@@ -35,7 +35,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="widgets.css" type="text/css" media="screen" />
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     
 <script src="wpd.min.js"></script>
@@ -44,6 +43,7 @@
     <!-- thirdparty -->
     <script src="https://kit.fontawesome.com/6b7d6b5ea1.js" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
 </head>
 
 <body>
@@ -65,8 +65,8 @@
         <input type="file" id="landingPageFileLoadBox" multiple style="display: none;" onchange="wpd.imageManager.load(true);" />
         <label id="fileInputLabel">
             <p style="margin: 0 0 10px 0;"><i class="fa-regular fa-images fa-3x" style="color: var(--dark-gray); "></i></p>
-            <p class="file-input-title">Drag and drop or click here</p>
-            <p class="file-input-subtitle">to upload your graph image</p>
+            <p class="file-input-title">Drag and drop or paste from clipboard</p>
+            <p class="file-input-subtitle">or click here to upload your graph image</p>
         </label>
     </div>
 </div>
@@ -130,8 +130,8 @@
     <div class="wpd-menu-dropdown">
         <ul>
             <li id="wpd-helpmenu-about" onclick="wpd.popup.show('helpWindow');">About WebPlotDigitizer Lite</li>
-            <!-- <li id="wpd-helpmenu-tutorial"><a href="https://automeris.io/WebPlotDigitizer/tutorial.html" target="_blank">Tutorials</a></li>
-            <li id="wpd-helpmenu-manual"><a href="https://automeris.io/WebPlotDigitizer/userManual.pdf" target="_blank">User Manual</a></li> -->
+            <li id="wpd-helpmenu-tutorial"><a href="https://www.loom.com/share/d039bfc0a4e94fcabd8eb43b1084ed48?sid=5db3b0be-87e7-4b24-8b17-e948026c2d07" target="_blank" style="color: red;">Video Tutorial</a></li>
+            <!-- <li id="wpd-helpmenu-manual"><a href="https://automeris.io/WebPlotDigitizer/userManual.pdf" target="_blank">User Manual</a></li> -->
             <li id="wpd-helpmenu-github"><a href="https://github.com/kevincnguyen/WebPlotDigitizer-Lite" target="_blank">GitHub Page</a></li>
             <li id="wpd-helpmenu-issues"><a href="https://github.com/kevincnguyen/WebPlotDigitizer-Lite/issues" target="_blank">Report Issues</a></li>
             <!-- <li id="wpd-helpmenu-donate"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=CVFJGV5SNEV9J&lc=US&item_name=WebPlotDigitizer&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank">Donate (PayPal)</a></li> -->
@@ -713,7 +713,7 @@
     </div>
     <div class="popup-body">
         <p>Supported file formats:</p>
-        <p>JPEG, PNG, SVG, GIF, BMP, WebP, etc.</p>
+        <p>JPEG, PNG, PDF, SVG, GIF, BMP, WebP, etc.</p>
         <p>&nbsp;</p>
         <p align="center"><input type="file" id="fileLoadBox" multiple onchange="wpd.imageManager.load(false);" /></p>
         <p>&nbsp;</p>
@@ -1664,8 +1664,8 @@
 <div class="i18n-string" id="i18n-string-unsupported">Unsupported Feature!</div>
 <div class="i18n-string" id="i18n-string-unsupported-text">This feature has not been implemented in the current version. This may be available in a future release.</div>
 <div class="i18n-string" id="i18n-string-processing">Processing</div>
-<div class="i18n-string" id="i18n-string-invalid-file">ERROR: Invalid File!</div>
-<div class="i18n-string" id="i18n-string-invalid-file-text">Please load a valid image file. Common image formats such as JPG, PNG, BMP, GIF etc. should work. Word documents are not accepted.</div>
+<div class="i18n-string" id="i18n-string-invalid-file">ERROR: Invalid File</div>
+<div class="i18n-string" id="i18n-string-invalid-file-text">Please load a valid file such as JPG, PNG, PDF, SVG, GIF, BMP, WebP, etc. Word documents are not supported.</div>
 <div class="i18n-string" id="i18n-string-raw">Raw</div>
 <div class="i18n-string" id="i18n-string-nearest-neighbor">Nearest Neighbor</div>
 <div class="i18n-string" id="i18n-string-all">All</div>
