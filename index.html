@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html>
+<!--
+	WebPlotDigitizer - https://automeris.io/WebPlotDigitizer
+
+	Copyright 2010-2022 Ankit Rohatgi <ankitrohatgi@hotmail.com>
+
+	This file is part of WebPlotDigitizer.
+
+    WebPlotDigitizer is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    WebPlotDigitizer is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with WebPlotDigitizer.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="Description" content="WebPlotDigitizer-Lite v4.7 - Web based tool to extract numerical data from plots and graph images with more user-friendly UI enhancements." />
+    <meta name="Keywords" content="Plot, Digitizer, WebPlotDigitizer, Ankit Rohatgi, Extract Data, Convert Plots, XY, Polar, Ternary, Map, HTML5" />
+    <meta name="Author" content="Ankit Rohatgi, Kevin Nguyen" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>WebPlotDigitizer Lite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="widgets.css" type="text/css" media="screen" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    
+<script src="wpd.min.js"></script>
+
+
+    <!-- thirdparty -->
+    <script src="https://kit.fontawesome.com/6b7d6b5ea1.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <div id="loadingCurtain" style="position: absolute; top: 0px; left: 0px; z-index: 100; width: 100%; height: 100%; background-color: white;">
+        Loading application, please wait...
+        <br />
+        <br />
+        Problems loading? Make sure you have a recent version of Google Chrome, Firefox, Safari or Microsoft Edge installed.
+    </div>
+
+    <!-- landing page -->
+    <div id="landing-page">
+    <p class="landing-title">
+        <i class="fa-solid fa-chart-line"></i>
+        WebPlotDigitizer Lite
+    </p>
+    <p class="landing-subtitle">Convert images of graphs into data points</p>
+    <div class="landing-drop-area" id="dropArea">
+        <input type="file" id="landingPageFileLoadBox" multiple style="display: none;" onchange="wpd.imageManager.load(true);" />
+        <label id="fileInputLabel">
+            <p style="margin: 0 0 10px 0;"><i class="fa-regular fa-images fa-3x" style="color: var(--dark-gray); "></i></p>
+            <p class="file-input-title">Drag and drop or click here</p>
+            <p class="file-input-subtitle">to upload your graph image</p>
+        </label>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('landingPageFileLoadBox');
+
+        // Handle both drag and drop events
+        dropArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', function () {
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', function (e) {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                wpd.imageManager.load();
+            }
+        });
+
+        dropArea.addEventListener('click', function (e) {
+            fileInput.click();
+        });
+    });
+</script>
+
+    <div id="allContainer">
+        <!-- toolbar + graphics -->
+        <div id="mainContainer" style="border-right: thin lightgrey solid;">
+            <div id="topContainer">
+                <div id="menuButtonsContainer"><div class="wpd-menu">
+    <div class="wpd-menu-header" style="font-weight: 500;">
+        <i class="fa-solid fa-chart-line"></i>
+        WPD Lite
+    </div>
+</div>
+<div class="wpd-menu">
+    <div class="wpd-menu-header">File</div>
+    <div class="wpd-menu-dropdown">
+        <ul>
+            <li onclick="wpd.popup.show('loadNewImage');">Load Image(s)</li>
+            <li onclick="wpd.saveResume.load();">Load Project</li>
+            <li onclick="wpd.saveResume.save();">Save Project</li>
+            <!-- <li onclick="wpd.scriptInjector.start();">Run Script</li> -->
+        </ul>
+    </div>
+</div>
+
+<div class="wpd-menu">
+    <div class="wpd-menu-header">Help</div>
+    <div class="wpd-menu-dropdown">
+        <ul>
+            <li id="wpd-helpmenu-about" onclick="wpd.popup.show('helpWindow');">About WebPlotDigitizer Lite</li>
+            <!-- <li id="wpd-helpmenu-tutorial"><a href="https://automeris.io/WebPlotDigitizer/tutorial.html" target="_blank">Tutorials</a></li>
+            <li id="wpd-helpmenu-manual"><a href="https://automeris.io/WebPlotDigitizer/userManual.pdf" target="_blank">User Manual</a></li> -->
+            <li id="wpd-helpmenu-github"><a href="https://github.com/kevincnguyen/WebPlotDigitizer-Lite" target="_blank">GitHub Page</a></li>
+            <li id="wpd-helpmenu-issues"><a href="https://github.com/kevincnguyen/WebPlotDigitizer-Lite/issues" target="_blank">Report Issues</a></li>
+            <!-- <li id="wpd-helpmenu-donate"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=CVFJGV5SNEV9J&lc=US&item_name=WebPlotDigitizer&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" target="_blank">Donate (PayPal)</a></li> -->
+        </ul>
+    </div>
+</div></div>
+
+                <div id="topToolbarContainer">
+                    <!-- controls that show on top -->
+                    <div style="position:relative;">
+                        <!-- Extra toolbars go here -->
+                        <!-- Adjust Points Toolbar -->
+<div id="adjustDataPointsToolbar" class="toolbar" style="width:350px;">
+    <p><input type="button" value='View Keyboard Shortcuts' onclick="wpd.popup.show('adjust-data-points-keyboard-shortcuts-window');" /></p>
+</div>
+                    </div>
+                </div>
+
+                <div style="display: inline-flex; justify-content: space-between; width: 200px; position: absolute; top: 9px; right: 290px;">
+                    <button type="button" title="Rotate 90° counter-clockwise" onclick="wpd.graphicsWidget.rotateCounterClockwise();" style="border:none; width:20px; font-size:16px; display:inline-flex; align-items:self-end; justify-content:center;">↺</button>
+                    <button type="button" title="Rotate 90° clockwise" onclick="wpd.graphicsWidget.rotateClockwise();" style="border:none; width:20px; font-size:16px; display:inline-flex; align-items:self-end; justify-content:center;">↻</button>
+                    <button type="button" title="Zoom in" onclick="wpd.graphicsWidget.zoomIn();" style="border:none; width:20px;">+</button>
+                    <button type="button" title="Zoom out" onclick="wpd.graphicsWidget.zoomOut();" style="border:none; width:20px;">-</button>
+                    <button type="button" title="View actual size" onclick="wpd.graphicsWidget.zoom100perc();" style="border:none;">100%</button>
+                    <button type="button" title="Fit to graphics area" onclick="wpd.graphicsWidget.zoomFit();" style="border:none;">Fit</button>
+                    <button title="Toggle extended crosshair" onclick="wpd.graphicsWidget.toggleExtendedCrosshairBtn();" style="border:none; width:20px; background-image: url('images/crosshair.png'); background-repeat: no-repeat; background-position: center;" id="extended-crosshair-btn">&nbsp;</button>
+                </div>
+            </div>
+
+            <div style="display: flex;">
+                <div id="left-side-container" style="width:200px; padding-right: 5px; flex: 0 0 169px; border-right: thin lightgrey solid;">
+                    <!-- tree control -->
+                    <div style="display: flex; flex-direction: column; width: 168px; max-height:100%;">
+    <div id="tree-container" style="flex: 1; overflow-y: auto; outline:none;" tabindex="1">
+        <!-- tree -->
+    </div>
+
+    <!-- tree widgets -->
+    <div id="image-item-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title"><i class="fa-regular fa-image"></i> Image</p>
+        <center>
+            <p><input type="button" value='Image Info' style="width:150px;" class="sidebar-button" onclick="wpd.imageEditing.showImageInfo();" /></p>
+        </center>
+    </div>
+
+    <div id="axes-group-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title"><i class="fa-solid fa-chart-column"></i> Axes</p>
+        <center>
+            <p><input type="button" value='Redo Calibration' style="width:150px;" class="sidebar-button" onclick="wpd.alignAxes.start();" /></p>
+            <p><input type="button" value='Remove Grid' style="width:150px;" class="sidebar-button" onclick="wpd.gridDetection.start();" /></p>
+            <!-- <p><input type="button" value="Import Calibration" style="width:150px;"/></p> -->
+            <!-- <p><input type="button" value="Export Calibration" style="width:150px;"/></p> -->
+        </center>
+    </div>
+
+    <div id="axes-item-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title"><i class="fa-solid fa-chart-column"></i> Axes</p>
+        <center>
+            <p><input type="button" value='Rename' style="width:150px;" class="sidebar-button" onclick="wpd.alignAxes.showRenameAxes();" /></p>
+            <p><input type="button" value='Tweak Calibration' style="width:150px;" class="sidebar-button" onclick="wpd.alignAxes.reloadCalibrationForEditing();" id="tweak-axes-calibration-button" /></p>
+            <p><input type="button" value='Delete' style="width:150px;" class="sidebar-button" onclick="wpd.alignAxes.deleteCalibration();" /></p>
+        </center>
+    </div>
+
+    <div id="dataset-group-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title"><i class="fa-solid fa-table"></i> Datasets</p>
+        <center>
+            <p><input type="button" value='Add Dataset' style="width:150px;" class="sidebar-button" onclick="wpd.dataSeriesManagement.showAddDataset();" /></p>
+            <p><input type="button" value='Export All Data' style="width:150px; color: red" class="sidebar-button" onclick="wpd.popup.show('export-all-data-popup');" /></p>
+        </center>
+    </div>
+
+    <div id="measurement-group-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title"><i class="fa-solid fa-ruler"></i> Measurements</p>
+        <center>
+            <p><input type="button" value='Distance' style="width:150px;" class="sidebar-button" onclick="wpd.tree.addMeasurement(wpd.measurementModes.distance);" /></p>
+            <p><input type="button" value='Angle' style="width:150px;" class="sidebar-button" onclick="wpd.tree.addMeasurement(wpd.measurementModes.angle);" /></p>
+            <p><input type="button" value='Area/Perimeter' style="width:150px;" class="sidebar-button" onclick="wpd.tree.addMeasurement(wpd.measurementModes.area);" /></p>
+        </center>
+    </div>
+
+    <div id="dataset-item-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title">Dataset</p>
+        <center>
+            <p>Axes: <select id="dataset-item-axes-select" style="min-width:100px; max-width:150px;" onchange="wpd.dataSeriesManagement.changeAxes(this.value);"></select></p>
+            <!-- <p><input type="button" value='Point Color' style="width: 150px;" id="dataset-display-color-picker-button" onclick="wpd.dataSeriesManagement.startColorPicker();" /></p> -->
+            <p><input type="button" value='Rename Dataset' style="width:150px;" class="sidebar-button" onclick="wpd.dataSeriesManagement.showRenameDataset();" /></p>
+            <p><input type="button" value='Rename Labels' style="width:150px;" class="sidebar-button" onclick="wpd.dataSeriesManagement.showRenameAxesLabels();" /></p>
+            <p><input type="button" value='Delete Dataset' style="width:150px;" class="sidebar-button" onclick="wpd.dataSeriesManagement.deleteDataset();" /></p>
+            <!-- <p><input type="button" value='Edit Point Groups' id="dataset-edit-point-groups-button" style="width: 150px;" class="sidebar-button" onclick="wpd.pointGroups.showSettingsPopup();" /></p> -->
+            <p><input type="button" value='Clear Data' style="width:150px;" class="sidebar-button" onclick="wpd.acquireData.clearAll();" /></p>
+            <p><input type="button" value='Export Data' style="width:150px; color: red;" class="sidebar-button" onclick="wpd.dataTable.showTable();" /></p>
+            <p><b>Data Points:</b> <span class="data-point-counter">0</span></p>
+        </center>
+    </div>
+
+    <div id="distance-item-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title">Distance</p>
+        <center style="margin-top: 10px;">
+            <p>
+                Axes:
+                <select id="distance-item-axes-select" style="min-width:100px; max-width:150px;" onchange="wpd.measurement.changeAxes(this.value);"></select>
+            </p>
+            <p><input type="button" value='Clear All' style="width:150px;" class="sidebar-button" onclick="wpd.measurement.clearAll();" /></p>
+            <p><input type="button" value='Export Data' style="width:150px; color: red;" class="sidebar-button" onclick="wpd.dataTable.showDistanceData();" /></p>
+        </center>
+    </div>
+
+    <div id="angle-item-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title">Angle</p>
+        <center style="margin-top: 10px;">
+            <p><input type="button" value='Clear All' style="width:150px;" class="sidebar-button" onclick="wpd.measurement.clearAll();" /></p>
+            <p><input type="button" value='Export Data' style="width:150px; color: red;" class="sidebar-button" onclick="wpd.dataTable.showAngleData();" /></p>
+        </center>
+    </div>
+
+    <div id="area-item-tree-widget" class="tree-widget" style="flex: 0 0 100px;">
+        <p class="sidebar-title" style="margin-bottom: 10px;">Area/Perimeter</p>
+        <center>
+            <p>Axes: <select id="area-item-axes-select" style="min-width:100px; max-width:150px;" onchange="wpd.measurement.changeAxes(this.value);"></select></p>
+            <p><input type="button" value='Clear All' style="width:150px;" class="sidebar-button" onclick="wpd.measurement.clearAll();" /></p>
+            <p><input type="button" value='Export Data' style="width:150px; color: red;" class="sidebar-button" onclick="wpd.dataTable.showAreaData();" /></p>
+        </center>
+    </div>
+
+</div>
+                </div>
+
+                <div id="graphicsContainer" style="flex: 1;">
+                    <!-- the main canvas goes here -->
+                    <div id="canvasDiv" style="position:relative;">
+                        <canvas id="mainCanvas" class="canvasLayers" style="z-index:1;"></canvas>
+                        <canvas id="dataCanvas" class="canvasLayers" style="z-index:2;"></canvas>
+                        <canvas id="drawCanvas" class="canvasLayers" style="z-index:3;"></canvas>
+                        <canvas id="hoverCanvas" class="canvasLayers" style="z-index:4;"></canvas>
+                        <canvas id="topCanvas" class="canvasLayers" style="z-index:5;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bottomContainer">
+                <div id="bottomNavbarContainer"><!-- Image and Page navigation bar -->
+<div id="imageAndPageNavbar">
+    <span class="files" hidden>Image: </span>
+    <div class="files" hidden><select id="image-file-select" style="width:100%;" onchange="wpd.appData.getFileManager().switch(this.value);"></select></div>
+    <div id="navSeparator" hidden></div>
+    <span class="paged" hidden>Page: </span>
+    <div class="paged" hidden><select id="image-page-nav-select" style="width:100%;" onchange="wpd.appData.getPageManager().switch(this.value);"></select></div>
+    <div class="paged" hidden><input type="button" value="Previous" style="width:100px;" onclick="wpd.appData.getPageManager().previous();" /></div>
+    <div class="paged" hidden><input type="button" value="Next" style="width:100px;" onclick="wpd.appData.getPageManager().next();" /></div>
+    <div class="paged" hidden><input type="button" value="Page Labels" style="width:100px;" onclick="wpd.popup.show('image-page-relabel-popup');" /></div>
+</div></div>
+            </div>
+        </div>
+
+        <!-- sidebar + zoom -->
+        <div id="sidebarContainer">
+            <!-- zoom window goes here -->
+            <div style="position:relative;" id="zoomDiv">
+                <canvas id="zoomCanvas" class="zoomLayers" width=250 height=250 style="position:relative; top: 0px; left: 0px; z-index:1;"></canvas>
+                <canvas id="zoomCrossHair" class="zoomLayers" width=250 height=250 style="position:absolute; top: 0px; left: 0px; z-index:2; background:transparent;"></canvas>
+                <div id="cursorPosition" style="position:relative;">
+                    [<span id="mousePosition"></span>]
+                </div>
+            </div>
+
+            <div id="zoom-settings-container"><input type="button" id="zoom-settings-button" title="Change zoom settings" value="&#9881;" onclick="wpd.zoomView.showSettingsWindow();" /></div>
+
+            <div style="position:relative;" id="sidebarControlsContainer">
+                <!-- side bars go here -->
+                <!-- axes calibration -->
+<div id="axes-calibration-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;">Adjust Axes Calibration</p>
+    <br />
+    <div class="sidebar-body">
+        <p>Click to select points.</p>
+        <p>Use arrow keys to adjust positions.</p>
+    </div>
+    <br />
+    <p align="center"><input type="button" value='Done' class="popup-action" style="width: 120px;" onclick="wpd.alignAxes.getCornerValues();" /></p>
+    <div class="sidebar-tip">
+        <p>
+            <i class="fa-solid fa-circle-info"></i>
+            <b>Tip</b>
+        </p>
+        <p class="sidebar-tip-body">
+            Use <em>Shift+Arrow</em> to move faster
+        </p>
+    </div>
+</div>
+
+<!-- start alignment -->
+<div id="start-alignment-sidebar" class="sidebar">
+    <div class="centered" style="padding-top: 10px;">
+        <input type="button" value='Begin Aligning Axes' class="popup-action" onclick="wpd.alignAxes.start();" />
+    </div>
+</div>
+
+<!-- acquire data -->
+<div id="acquireDataSidebar" class="sidebar" style="overflow-y: auto;">
+    <p class="sidebar-title" style="padding: 4px; cursor: pointer;" onclick="toggleManualExtraction();">
+        <i id="manual-right" class="fa-solid fa-caret-right"></i>
+        <i id="manual-down" class="fa-solid fa-caret-down" style="display: none;"></i>
+        <span style="padding-left: 5px;">Manual Edit</span>
+    </p>
+    <div id="manual-extraction-section" style="display: none;">
+        <p>
+            <input type="button" value='Add Point (A)' class="sidebar-button" onclick="wpd.acquireData.manualSelection();" style="width:110px;" id="manual-select-button">
+            <input type="button" value='Adjust Point (S)' class="sidebar-button" onClick="wpd.acquireData.adjustPoints();" style="width: 110px;" id="manual-adjust-button">
+        </p>
+        <p>
+            <input type="button" value='Delete Point (D)' class="sidebar-button" onclick="wpd.acquireData.deletePoint();" style="width: 110px;" id="delete-point-button">
+            <input type="button" value='Edit Labels (E)' class="sidebar-button" id="edit-data-labels" onclick="wpd.acquireData.editLabels();" style="display: none; width: 110px;">
+        </p>
+    </div>
+
+    <br />
+    
+    <p class="sidebar-title" style="padding: 4px;">Automatic Extraction</p>
+    <p>
+        <b>Color</b>
+        <select id="color-detection-mode-select" onchange="wpd.colorPicker.changeDetectionMode();">
+            <option value="fg">Data Color</option>
+            <option value="bg">Background Color</option>
+        </select>
+        <input type="button" id="color-button" value=" " onclick="wpd.colorPicker.startPicker();" style="width: 25px;" title='Click to change color' />
+    </p>
+    <p>
+        <b>Color Tolerance</b>
+        <input type="text" size="3" id="color-distance-value" onchange="wpd.colorPicker.changeColorDistance();" />
+        <!-- <input type="button" value='Filter Colors' onclick="wpd.colorPicker.testColorDetection();" style="width: 90px; padding: 5px;" class="sidebar-button"> -->
+    </p>
+    <p align="center" style="margin-top: 5px;">
+        <input type="button" value='Hide Legends' id="hideLegend" class="popup-action" onclick="wpd.dataMask.hideLegends()" />
+    </p>
+    <hr style="border: none; height: 1px;"/>
+
+    <p style="padding: 4px; cursor: pointer;" onclick="toggleAdvancedExtraction();">
+        <i id="advanced-right" class="fa-solid fa-caret-right"></i>
+        <i id="advanced-down" class="fa-solid fa-caret-down" style="display: none;"></i>
+        <span style="padding-left: 5px;">Advanced</span>
+    </p>
+    <div id="advanced-extraction-section" style="display: none;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 3px;"> 
+                <b style="margin-right: 3px;">Masking Tools</b>
+                <i class="fa-solid fa-circle-info mask-tip" onclick="wpd.popup.show('masking-tips');"></i>
+            </div>
+            <button class="sidebar-button" onclick="wpd.dataMask.markBox();" id="box-mask" style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 4px; width:185px;">
+                <i class="ph ph-selection"></i>
+                Rectangle Selection
+            </button>
+            <button class="sidebar-button" onClick="wpd.dataMask.markPen();" id="pen-mask" style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 4px; width:185px;">
+                <i class="ph ph-pencil-line"></i>
+                Draw Mask
+            </button>
+            <button class="sidebar-button" onClick="wpd.dataMask.eraseMarks();" id="erase-mask" style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 4px; width:185px;">
+                <i class="ph ph-eraser"></i>
+                Erase Mask
+            </button>
+            <!-- <input type="button" value='Stop Masking' class="sidebar-button" onclick="wpd.dataMask.viewMask();" id="view-mask" style="width: 185px;"/> -->
+        </div>
+        <div id="mask-erase-container" class="sidebar-extras">
+            <p class="centered" style="gap: 3px;">
+                <b>Width</b>
+                <input type="range" id="eraseThickness" min="1" max="150" value="20" style="width:80px;">
+                <input type="button" id="clearMaskBtn" value='Erase All' style="width:80px; padding: 5px;" class="sidebar-button" onclick="wpd.dataMask.clearMask();" />
+            </p>
+        </div>
+        <div id="mask-paint-container" class="sidebar-extras">
+            <p class="centered" style="gap: 3px;">
+                <b>Width</b>
+                <input type="range" id="paintThickness" min="1" max="150" value="20" style="width:120px;">
+            </p>
+        </div>
+        <hr style="border: none; height: 1px; margin-top: 15px;"/>
+
+        <div>
+            <p>
+                <b>Algorithm</b>
+                <select id="auto-extract-algo-name" onchange="wpd.algoManager.applyAlgoSelection();"></select>
+            </p>
+            <div id="algo-parameter-container" style="margin-left: 10px; margin-top: 5px;"></div>
+        </div>
+    </div>
+
+
+    <p align="center" style="margin-top: 5px;">
+        <input type="button" value='Extract' style="width:40px;" class="popup-action" onclick="wpd.algoManager.run();" />
+    </p>
+
+    <div class="sidebar-tip">
+        <p>
+            <i class="fa-solid fa-circle-info"></i>
+            <b>Tip</b>
+        </p>
+        <p>
+            Modify the <em>Color Tolerance</em> to expand or narrow the range of colors that are considered acceptable.
+        </p>
+    </div>
+
+    <div id="point-groups-controls" hidden>
+        <br />
+        <p class="sidebar-title" style="padding: 4px;">Point Groups</p>
+        <p>Current Tuple: <span id="current-point-tuple-index" style="font-weight: bold;"></span></p>
+        <p>Current Group: <span id="current-point-group-name" style="font-weight: bold;"></span></p>
+        <p>
+            <input type="button" value="Prev Group (,)" onclick="wpd.pointGroups.previousGroup();" style="width: 115px;">
+            <input type="button" value="Next Group (.)" onclick="wpd.pointGroups.nextGroup();" style="width: 115px;">
+        </p>
+    </div>
+    <div id="value-overrides-controls" hidden>
+        <br />
+        <p class="sidebar-title" style="padding: 4px;">Overrides</p>
+        <p>
+            <input type="button" value="Override Values (R)" id="override-data-values" style="width: 140px;">
+            <span id="overridden-data-indicator" hidden>&#8682;</span>
+        </p>
+    </div>
+</div>
+
+<!-- edit image -->
+<div id="editImageToolbar" class="sidebar">
+    <p align="center"><b>Edit Image</b></p>
+    <p align="center"><input type="button" value="H. Flip" style="width: 75px;" onclick="hflip();"><input type="button" value="V. Flip" style="width: 75px;" onClick="vflip();"></p>
+    <p align="center"><input type="button" value="Crop" style="width: 150px;" onclick="cropPlot();"></p>
+    <p align="center"><input type="button" value="Restore" style="width: 150px;" onclick="restoreOriginalImage();"></p>
+    <p align="center"><input type="button" value="Save .PNG" style="width: 150px;" onclick="savePNG();"></p>
+</div>
+
+<!-- distance measurement -->
+<div id="measure-distances-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;">Measure Distances</p>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10px;">
+        <p align="center">
+            <input type="button" value='Add Pair (A)' style="width: 115px;" id="add-pair-button" class="sidebar-button" onclick="wpd.measurement.addItem();" />
+        </p>
+        <p align="center">
+            <input type="button" value='Delete Pair (D)' style="width: 115px;" id="delete-pair-button" class="sidebar-button" onclick="wpd.measurement.deleteItem();" />
+        </p>
+    </div>
+</div>
+
+<!-- angle measurement -->
+<div id="measure-angles-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;">Measure Angles</p>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10px;">
+        <p align="center">
+            <input type="button" value='Add Angle (A)' style="width: 115px;" id="add-angle-button" class="sidebar-button" onclick="wpd.measurement.addItem();" />
+        </p>
+        <p align="center">
+            <input type="button" value='Delete Angle (D)' style="width: 115px;" id="delete-angle-button" class="sidebar-button" onclick="wpd.measurement.deleteItem();" />
+        </p>
+    </div>
+</div>
+
+<!-- distance measurement -->
+<div id="measure-area-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;">Measure Area/Perimeter</p>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10px;">
+        <p align="center">
+            <input type="button" value='Add Polygon (A)' style="width: 145px;" id="add-polygon-button" class="sidebar-button" onclick="wpd.measurement.addItem();" />
+        </p>
+        <p align="center">
+            <input type="button" value='Delete Polygon (D)' style="width: 145px;" id="delete-polygon-button" class="sidebar-button" onclick="wpd.measurement.deleteItem();" />
+        </p>
+    </div>
+    <br />
+    <span id="add-polygon-info" class="sidebar-tip">
+        <p>
+            <i class="fa-solid fa-circle-info"></i>
+            <b>Instructions</b>
+        </p>
+        <p class="sidebar-tip-body">
+            Press <em>Enter or Esc</em> to complete the polygon
+        </p>
+    </span>
+</div>
+
+<!-- open path measurement -->
+<div id="measure-open-path-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;">Measure Path</p>
+    <p>
+        <input type="button" value="Add Path (A)" style="width: 115px;" id="add-open-path-button" onclick="wpd.measurement.addItem();" />
+        <input type="button" value="Delete Path (D)" style="width: 115px;" id="delete-open-path-button" onclick="wpd.measurement.deleteItem();" />
+    </p>
+</div>
+
+<!-- closed path measurement -->
+<div id="measure-closed-path-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;">Measure Closed Path</p>
+    <p>
+        <input type="button" value="Add Path (A)" style="width: 115px;" id="add-closed-path-button" onclick="wpd.measurement.addItem();" />
+        <input type="button" value="Delete Path (D)" style="width: 115px;" id="delete-closed-path-button" onclick="wpd.measurement.deleteItem();" />
+    </p>
+</div>
+
+<!-- grid detection -->
+<div id="grid-detection-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;">Detect Grid</p>
+    <p>
+        Mask
+        <input type="button" value='Box' style="width: 60px;" id="grid-mask-box" onclick="wpd.gridDetection.markBox();" />
+        <input type="button" value='Clear' style="width: 60px;" id="grid-mask-clear" onclick="wpd.gridDetection.clearMask();" />
+        <input type="button" value='View' style="width: 60px;" id="grid-mask-view" onclick="wpd.gridDetection.viewMask();" />
+    </p>
+    <hr />
+    <p>
+        Color
+        <input type="button" value='Pick' style="width: 60px;" id="grid-color-picker-button" onclick="wpd.gridDetection.startColorPicker();" />
+        <input type="text" value="10" style="width: 60px;" id="grid-color-distance" onchange="wpd.gridDetection.changeColorDistance();" />
+        <input type="button" value='Test' style="width: 60px;" id="grid-color-test" onclick="wpd.gridDetection.testColor();" />
+    </p>
+    <p align="center"><input type="checkbox" id="grid-background-mode" checked onchange="wpd.gridDetection.changeBackgroundMode();" /> Background Mode</p>
+    <hr />
+    <table>
+        <tr>
+            <td align="right">Horizontal </td>
+            <td><input type="checkbox" id="grid-horiz-enable" checked /></td>
+        </tr>
+        <tr>
+            <td align="right">X% </td>
+            <td>&nbsp; <input type="text" value="80" id="grid-horiz-perc" style="width: 40px;" /></td>
+        </tr>
+        <tr>
+            <td align="right">Vertical </td>
+            <td><input type="checkbox" id="grid-vert-enable" checked /></td>
+        </tr>
+        <tr>
+            <td align="right">Y% </td>
+            <td>&nbsp; <input type="text" value="80" id="grid-vert-perc" style="width: 40px;" /></td>
+        </tr>
+    </table>
+    <hr />
+    <p align="center">
+        <input type="button" value='Reset' style="width: 100px;" class="sidebar-button" onclick="wpd.gridDetection.reset();" />
+        &nbsp;
+        <input type="button" value='Detect' style="width: 100px;" class="sidebar-button" onclick="wpd.gridDetection.run();" />
+    </p>
+</div>
+
+<!-- startup sidebar -->
+<div id="start-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;">WebPlotDigitizer Lite</p>
+    <br />
+    <center>
+        <p><input type="button" value='Load Image' style="width: 180px;" class="sidebar-button" onclick="wpd.popup.show('loadNewImage');" /></p>
+        <p><input type="button" value='Tutorial Video' style="width: 180px;" class="sidebar-button" onclick="window.open('https://youtu.be/P7GbGdMvopU','_blank');" /></p>
+        <p><input type="button" value='Visit GitHub' style="width: 180px;" class="sidebar-button" onclick="window.open('https://github.com/kevincnguyen/WebPlotDigitizer-Lite','_blank');" /></p>
+    </center>
+    <div class="sidebar-tip">
+        <p>
+            <i class="fa-solid fa-circle-info"></i>
+            <b>Tip</b>
+        </p>
+        <p>
+            Navigate to <em>Add Calibration</em> to get started extracting data
+        </p>
+    </div>
+</div>
+
+<!-- image editing sidebar -->
+<div id="image-editing-sidebar" class="sidebar">
+    <p class="sidebar-title" style="padding: 4px;"><i class="fa-solid fa-pen-to-square"></i> Image Editing</p>
+    <center>
+        <div style="margin-top: 10px; display: flex; flex-direction: row; align-items: center; justify-content: center;">
+            <button type="button" style="width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center;" onclick="wpd.imageEditing.undo()" class="sidebar-button" id="image-editing-undo">
+                <i class="fa-solid fa-rotate-left"></i>
+                Undo
+            </button>
+            <button type="button" style="width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center;" onclick="wpd.imageEditing.redo()" class="sidebar-button" id="image-editing-redo">
+                <i class="fa-solid fa-rotate-right"></i>
+                Redo
+            </button>
+        </div>
+        <br />
+        <p align="center">
+            <input type="button" value='Crop' style="width: 120px;" onclick="wpd.imageEditing.startImageCrop()" class="popup-action" id="image-editing-crop" />
+            <!-- <input type="button" value="Fix Perspective" style="width: 120px;" onclick="wpd.imageEditing.startPerspective()" id="image-editing-perspective" /> -->
+        </p>
+        <!--
+        <p align="center">
+            <input type="button" value="Rotate" style="width: 120px;" onclick="" id="image-editing-rotate" />
+            <input type="button" value="?" style="width: 120px;" onclick="" id="image-editing-misc" />
+        </p>
+        -->
+        <p>
+        <div id="image-editing-crop-info">Click and drag to mark the crop region.</div>
+        <div id="image-editing-crop-info">Press <em>Enter</em> to complete cropping.</div>
+        <div id="image-editing-crop-info">Press <em>Esc</em> to cancel.</div>
+        </p>
+    </center>
+</div>
+
+<script>
+    function toggleManualExtraction() {
+        var manualSection = document.getElementById("manual-extraction-section");
+        var caretRight = document.getElementById("manual-right");
+        var caretDown = document.getElementById("manual-down");
+
+        if (manualSection.style.display === "none") {
+            manualSection.style.display = "block";
+            caretRight.style.display = "none";
+            caretDown.style.display = "inline-block";
+        } else {
+            manualSection.style.display = "none";
+            caretRight.style.display = "inline-block";
+            caretDown.style.display = "none";
+        }
+    }
+
+    function toggleAdvancedExtraction() {
+        var advancedSection = document.getElementById("advanced-extraction-section");
+        var caretRight = document.getElementById("advanced-right");
+        var caretDown = document.getElementById("advanced-down");
+
+        if (advancedSection.style.display === "none") {
+            advancedSection.style.display = "block";
+            caretRight.style.display = "none";
+            caretDown.style.display = "inline-block";
+        } else {
+            advancedSection.style.display = "none";
+            caretRight.style.display = "inline-block";
+            caretDown.style.display = "none";
+        }
+    }
+</script>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- popup windows go here -->
+    <!-- Background curtain for popups -->
+<div id="shadow" style="width:100%; height:100%; background-color: rgba(0,0,0,0.3); position:absolute; top:0px; left:0px; z-index:50; visibility:hidden;">
+</div>
+
+<!-- Welcome -->
+<div id="welcome" class="popup" style="width: 400px;">
+    <div class="popup-heading">
+        <p class="popup-title">Welcome to WebPlotDigitizer Lite</p>
+    </div>
+    <div class="popup-body">
+        <p>Click <em>Axes > Add Calibration</em> to get started extracting data.</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Close' class="popup-cancel" onclick="wpd.popup.close('welcome');" />
+    </div>
+</div>
+
+<!-- Masking Instructions -->
+<div id="masking-tips" class="popup" style="width: 450px;">
+    <div class="popup-heading">
+        <p class="popup-title">What is Masking?</p>
+    </div>
+    <div class="popup-body">
+        <p>Masking allows users to define a specific region within the graph where automatic data point extraction will be focused.</p>
+        <p>Click a masking tool to select and deselect it.</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Close' class="popup-cancel" onclick="wpd.popup.close('masking-tips');" />
+    </div>
+</div>
+
+<!-- Hide Legend Instructions -->
+<div id="hide-legend" class="popup" style="border: 2px solid black; display: flex; flex-direction: row; box-shadow: 5px 5px 0 0 black;">
+    <p class="popup-heading" style="color: black; background-color: white;">
+        <i class="fa-solid fa-circle-info"></i>
+        Click and drag to highlight the legends. This action will conceal the legends from data extraction.
+    </p>
+    <i class="fa-solid fa-xmark" style="padding: 3px 3px 3px 6px; cursor: pointer;" onclick="wpd.popup.close('hide-legend');"></i>
+</div>
+
+<!-- Load Image -->
+<div id="loadNewImage" class="popup" style="width: 450px;">
+    <div class="popup-heading">
+        <p class="popup-title">New Project</p>
+        <p class="popup-subtitle">Upload graph image file(s)</p>
+    </div>
+    <div class="popup-body">
+        <p>Supported file formats:</p>
+        <p>JPEG, PNG, SVG, GIF, BMP, WebP, etc.</p>
+        <p>&nbsp;</p>
+        <p align="center"><input type="file" id="fileLoadBox" multiple onchange="wpd.imageManager.load(false);" /></p>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('loadNewImage');" />
+        <input type="button" value='Load' class="popup-action" onclick="wpd.imageManager.load(false);" />
+    </div>
+</div>
+
+<!-- Zoom Settings -->
+<div id="zoom-settings-popup" class="popup" style="width: 300px;">
+    <div class="popup-heading">
+        <p class="popup-title">Magnified View Settings</p>
+    </div>
+    <div class="popup-body">
+        <p>&nbsp;</p>
+        <center>
+            <table>
+                <tr>
+                    <td>
+                        <p>Magnification: </p>
+                    </td>
+                    <td>
+                        <p><input type="text" id="zoom-magnification-value" size="3" /> Times</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p>Crosshair Color: </p>
+                    </td>
+                    <td>
+                        <p>
+                            <select id="zoom-crosshair-color-value">
+                                <option value="black">Black</option>
+                                <option value="red">Red</option>
+                                <option value="yellow">Yellow</option>
+                            </select>
+                    </td>
+                </tr>
+            </table>
+        </center>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('zoom-settings-popup');" />
+        <input type="button" value="Apply" class="popup-action" onclick="wpd.zoomView.applySettings();" />
+    </div>
+</div>
+
+<!-- Run Script -->
+<div id="runScriptPopup" class="popup" style="width: 500px;">
+    <div class="popup-heading">
+        <p class="popup-title">Run Script</p>
+    </div>
+    <div class="popup-body">
+        <p align="left">Load a Javascript file to further extend the capabilities of WebPlotDigitizer.</p>
+        <p align="left">For examples, visit the <a href="https://github.com/ankitrohatgi/WebPlotDigitizer/tree/master/script_examples" target="_blank">WebPlotDigitizer repository</a>.</p>
+        <p>&nbsp;</p>
+        <p align="center"><input type="file" id="runScriptFileInput" /></p>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.scriptInjector.cancel();" />
+        <input type="button" value='Run' class="popup-action" onclick="wpd.scriptInjector.load();" />
+    </div>
+</div>
+
+<!-- Webcam Capture -->
+<div id="webcamCapture" class="popup" style="width: 650px;">
+    <div class="popup-heading">Webcam Capture</div>
+    <p>&nbsp;</p>
+    <p align="center"><video id="webcamVideo" autoplay="true" height="350"></video></p>
+    <p align="center"><input type="button" value="Capture" onclick="wpd.webcamCapture.capture();" /> <input type="button" value="Cancel" onclick="wpd.webcamCapture.cancel();" /></p>
+</div>
+
+<!-- Generic Message Popup -->
+<div id="messagePopup" class="popup" style="width: 400px;">
+    <div class="popup-heading">
+        <p id="message-popup-heading" class="popup-title"></p>
+    </div>
+    <div class="popup-body">
+        <p>&nbsp;</p>
+        <p align="center" id="message-popup-text"></p>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='OK' class="popup-action" onclick="wpd.messagePopup.close()" />
+    </div>
+</div>
+
+<!-- Generic Ok/Cancel Popup -->
+<div id="okCancelPopup" class="popup" style="width: 400px; z-index: 110;">
+    <div id="ok-cancel-popup-heading" class="popup-heading"></div>
+    <div class="popup-body">
+        <p>&nbsp;</p>
+        <p align="center" id="ok-cancel-popup-text"></p>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input id="ok-cancel-popup-cancel-button" type="button" class="popup-cancel" onclick="wpd.okCancelPopup.cancel()" />
+        <input id="ok-cancel-popup-ok-button" type="button" class="popup-action" onclick="wpd.okCancelPopup.ok()" />
+    </div>
+</div>
+
+<!-- Choose axes type -->
+<div id="axesList" class="popup" style="width: 400px;">
+    <div class="popup-heading">
+        <p class="popup-title">Choose Plot Type</p>
+    </div>
+    <div class="popup-body">
+        <p>&nbsp;</p>
+        <center>
+            <table>
+                <tr>
+                    <td align="left"><label><input type="radio" name="plotlisting" id="r_xy" checked> 2D (X-Y) Plot</label></td>
+                </tr>
+                <tr>
+                    <td align="left"><label><input type="radio" name="plotlisting" id="r_bar"> 2D Bar Plot</label></td>
+                </tr>
+                <tr>
+                    <td align="left"><label><input type="radio" name="plotlisting" id="r_polar"> Polar Diagram</label></td>
+                </tr>
+                <tr>
+                    <td align="left"><label><input type="radio" name="plotlisting" id="r_ternary"> Ternary Diagram</label></td>
+                </tr>
+                <tr>
+                    <td align="left"><label><input type="radio" name="plotlisting" id="r_map"> Map With Scale Bar</label></td>
+                </tr>
+                <tr>
+                    <td align="left"><label><input type="radio" name="plotlisting" id="r_image"> Image</label></td>
+                </tr>
+                <tr>
+                    <td align="left"><label><input type="radio" name="plotlisting" id="r_circular_chart_recorder"> Circular Chart Recorder</label></td>
+                </tr>
+            </table>
+        </center>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Cancel' class="popup-cancel" onClick="wpd.popup.close('axesList');" />
+        <input type="button" value='Align Axes' class="popup-action" onclick="wpd.alignAxes.start();" />
+    </div>
+</div>
+
+<!-- XY Alignment -->
+<div id="xyAlignment" class="popup" style="width: 550px;">
+    <div class="popup-heading">
+        <p class="popup-title">X and Y Axes Calibration</p>
+    </div>
+    <div class="popup-body">
+        <p>&nbsp;</p>
+        <p style="text-align: center;">Enter the <b>X-values</b> of <b>X1 and X2</b>:</p>
+        <center>
+            <table padding="10">
+                <tr>
+                    <td></td>
+                    <td align="center" valign="bottom">X1</td>
+                    <td align="center" valign="bottom" width="80">X2</td>
+                    <td align="center" valign="bottom" width="82">Log Scale</td>
+                </tr>
+                <tr>
+                    <td align="center">X-Value: </td>
+                    <td align="center"><input type="text" size="8" id="xmin" value="0" onfocus="wpd.alignAxes.zoomCalPoint(0);" /></td>
+                    <td align="center"><input type="text" size="8" id="xmax" value="1" onfocus="wpd.alignAxes.zoomCalPoint(1);" /></td>
+                    <td align="center"><input type="checkbox" id="xlog"></td>
+                </tr>
+            </table>
+        </center>
+        <br />
+        <p style="text-align: center;">Enter the <b>Y-values</b> of <b>Y1 and Y2</b>:</p>
+        <center>
+            <table padding="10">
+                <tr>
+                    <td></td>
+                    <td align="center" valign="bottom">Y1</td>
+                    <td align="center" valign="bottom" width="80">Y2</td>
+                    <td align="center" valign="bottom" width="82">Log Scale</td>
+                </tr>
+                <tr>
+                    <td align="center">Y-Value: </td>
+                    <td align="center"><input type="text" size="8" id="ymin" value="0" onfocus="wpd.alignAxes.zoomCalPoint(2);" /></td>
+                    <td align="center"><input type="text" size="8" id="ymax" value="1" onfocus="wpd.alignAxes.zoomCalPoint(3);" /></td>
+                    <td align="center"><input type="checkbox" id="ylog" /></td>
+                </tr>
+            </table>
+        </center>
+        <br />
+        <p align="center" class="footnote">
+            For <em>dates</em>, use yyyy/mm/dd hh:ii:ss format, where ii denotes minutes
+            <br />
+            (e.g. 2013/10/23 or 2013/10 or 2013/10/23 10:15 or just 10:15).
+            <br />
+            For <em>exponents</em>, enter values as 1e-3 for 10^-3.
+        </p>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Redo' class="popup-cancel" style="margin-left: 10px;" onclick="wpd.popup.close('xyAlignment'); wpd.alignAxes.start();" />
+        <input type="button" id="xybtn" class="popup-action" value='Finish' onclick="wpd.alignAxes.align(); wpd.colorPicker.startPicker();" />
+    </div>
+</div>
+
+<!-- Bar Alignment -->
+<div id="barAlignment" class="popup" style="width: 420px;">
+    <div class="popup-heading">Bar Chart Calibration</div>
+    <p align="center">Enter the values at the two points selected on the continuous axes along the bars</p>
+    <center>
+        <table padding="10">
+            <tr>
+                <td align="center" valign="bottom">Point 1</td>
+                <td align="center" valign="bottom" width="80">Point 2</td>
+                <td align="center" valign="bottom" width="80">Log Scale</td>
+            </tr>
+            <tr>
+                <td align="center"><input type="text" size="8" id="bar-axes-p1" value="0" onfocus="wpd.alignAxes.zoomCalPoint(0);" /></td>
+                <td align="center"><input type="text" size="8" id="bar-axes-p2" value="1" onfocus="wpd.alignAxes.zoomCalPoint(1);" /></td>
+                <td align="center"><input type="checkbox" id="bar-axes-log-scale" /></td>
+            </tr>
+        </table>
+    </center>
+    <p align="center"><label><input type="checkbox" id="bar-axes-rotated" /> Rotated axes (not exactly vertical or horizontal)</label></p>
+    <br />
+    <p align="center"><input type="button" value="OK" onclick="wpd.alignAxes.align();" /></p>
+</div>
+
+<!-- Map Alignment -->
+<div id="mapAlignment" class="popup" style="width: 350px;">
+    <div class="popup-heading">Map Axes Calibration</div>
+    <p align="left">Map Scale Size:</p>
+    <p align="center"><input type="text" size="6" id="scaleLength" value="1"> <input type="text" size="6" id="scaleUnits" value="Units" /></p>
+    <p>&nbsp;</p>
+    <p align="left">Origin location:</p>
+    <p align="left" style="text-indent:30px;"><label><input name="map-origin-radio" type="radio" id="map-origin-bottom-left" checked />Bottom left</label></p>
+    <p align="left" style="text-indent:30px;"><label><input name="map-origin-radio" type="radio" if="map-origin-top-left" />Top Left</label></p>
+    <br />
+    <p align="center"><input type="button" id="xybtn" value="OK" onclick="wpd.alignAxes.align();"></p>
+</div>
+
+<!-- Polar Alignment -->
+<div id="polarAlignment" class="popup" style="width: 400px;">
+    <div class="popup-heading">Align Polar Axes</div>
+    <center>
+        <table padding="15">
+            <tr>
+                <td>&nbsp;</td>
+                <td align="center"><b>Point 1</b></td>
+                <td align="center"><b>Point 2</b></td>
+                <td align="center"><b>Log Scale</b></td>
+            </tr>
+            <tr>
+                <td>R: </td>
+                <td align="center"><input type="text" size="6" id="polar-r1" value="1" onfocus="wpd.alignAxes.zoomCalPoint(1);" /></td>
+                <td align="center"><input type="text" size="6" id="polar-r2" value="1" onfocus="wpd.alignAxes.zoomCalPoint(2);" /></td>
+                <td align="center"><input type="checkbox" id="polar-log-scale" /></td>
+            </tr>
+            <tr>
+                <td>Θ: </td>
+                <td align="center"><input type="text" size="6" id="polar-theta1" value="1" onfocus="wpd.alignAxes.zoomCalPoint(1);" /></td>
+                <td align="center"><input type="text" size="6" id="polar-theta2" value="1" onfocus="wpd.alignAxes.zoomCalPoint(2);" /></td>
+                <td align="center">&nbsp;</td>
+            </tr>
+        </table>
+    </center>
+    <p align="center"><label><input type="radio" id="polar-degrees" name="angleUnits" checked> Degrees</label> <label><input type="radio" id="polar-radians" name="angleUnits"> Radians</label></p>
+    <p align="center"><input type="checkbox" id="polar-clockwise"> Clockwise</p>
+    <br />
+    <p align="center"><input type="button" value="OK" onclick="wpd.alignAxes.align();"></p>
+</div>
+
+<!-- Ternary Alignment -->
+<div id="ternaryAlignment" class="popup">
+    <div class="popup-heading">Select Range of Variables</div>
+    <p>&nbsp;</p>
+    <p align="center">Axes Orientation</p>
+    <center>
+        <table>
+            <tr>
+                <td><img src="images/ternarynormal.png" width="200"></td>
+                <td><img src="images/ternaryreverse.png" width="200"></td>
+            </tr>
+            <tr>
+                <td>
+                    <p align="center"><input type="radio" name="ternaryOrientation" id="ternarynormal" checked> Normal</p>
+                </td>
+                <td>
+                    <p align="center"><input type="radio" name="ternaryOrientation" id="ternaryreverse"> Reverse</p>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <p align="center">Range of Variables</p>
+    <center>
+        <table>
+            <tr>
+                <td>
+                    <p align="center"><input type="radio" id="range0to1" name="ternaryRange" checked> 0 to 1&nbsp;&nbsp;</p>
+                </td>
+                <td>
+                    <p align="center">&nbsp;&nbsp;<input type="radio" id="range0to100" name="ternaryRange"> 0 to 100</p>
+                </td>
+            </tr>
+        </table>
+    </center>
+    <p>&nbsp;</p>
+    <p align="center"><input type="button" value="OK" onclick="wpd.alignAxes.align();"></p>
+</div>
+
+<!-- Circular Chart Recorder Alignment -->
+<div id="circularChartRecorderAlignment" class="popup" style="width: 400px;">
+    <div class="popup-heading">Align Circular Chart Recorder Axes</div>
+    <center>
+        <table padding="15">
+            <tr>
+                <td align="center"><b>Time (T0)</b></td>
+                <td align="left"><input type="text" size="15" id="circular-t0" value="0" /></td>
+            </tr>
+            <tr>
+                <td align="center"><b>Ranges (R0, R2)</b></td>
+                <td align="left">
+                    <input type="text" size="6" id="circular-r0" value="0" />
+                    <input type="text" size="6" id="circular-r2" value="0" />
+                </td>
+            </tr>
+            <tr>
+                <td align="center"><b>Chart Start Time (T_Start)</b></td>
+                <td align="left"><input type="text" size="15" id="circular-tstart" value="0" /></td>
+            </tr>
+
+        </table>
+    </center>
+    <br />
+    <p align="center"><input type="button" value="OK" onclick="wpd.alignAxes.align();"></p>
+</div>
+
+<!-- View Data -->
+<div id="csvWindow" class="popup" style="width: 800px; height: 500px;">
+    <div class="popup-heading">
+        <div class="popup-title">Export Data</div>
+    </div>
+    <div class="popup-body">
+        <table style="width:780px;">
+            <tr>
+                <td>
+                    <!-- left panel -->
+                    <span id="data-table-dataset-control">
+                        <p>
+                            <b>Dataset: </b>
+                            <select id="data-table-dataset-list" onchange="wpd.dataTable.changeDataset();"></select>
+                        </p>
+                    </span>
+                    <br />
+
+                    <p align="center">
+                        <b>Variables: </b>
+                        <span id="dataVariables"></span>
+                    </p>
+                    <p align="center"><textarea id="digitizedDataTable" style="width: 480px; height: 250px;"></textarea></p>
+                    <p align="center">
+                        <input type="button" value='Download .CSV' class="popup-action" onclick="wpd.dataTable.generateCSV();" />
+                        <input type="button" value='Copy to Clipboard' class="popup-action" onclick="wpd.dataTable.copyToClipboard();" />
+                        <input type="button" value='Graph in Plotly' class="popup-action" onclick="wpd.dataTable.exportToPlotly();" />
+                        <input type="button" value='Close' class="popup-cancel" style="margin-left: 10px;" onclick="wpd.popup.close('csvWindow');" />
+                    </p>
+                    <br />
+                    <p align="center" class="footnote">*Plotly is a secure data analysis and graphing site with data sharing and access controls.</p>
+                    <p align="center" class="footnote">Visit <a href="http://plot.ly" target="plotlyWebsite">http://plot.ly</a> for details.</p>
+                </td>
+                <td valign="top" style="width:250px;">
+                    <!-- data side controls -->
+                    <p><b>Sort</b></p>
+                    <p class="leftIndent">Sort by: <select id="data-sort-variables" onchange="wpd.dataTable.reSortAndFilter();"></select></p>
+                    <p class="leftIndent">Order:
+                        <select id="data-sort-order" onchange="wpd.dataTable.reSortAndFilter();">
+                            <option value="ascending">Ascending</option>
+                            <option value="descending">Descending</option>
+                        </select>
+                    </p>
+                    <hr />
+
+                    <p><b>Filter</b></p>
+                    <p class="leftIndent">
+                        Variable Selector:
+                        <select id="data-filter-variables" onchange="wpd.dataTable.reSortAndFilter();"></select>
+                    </p>
+                    <hr />
+
+                    <p><b>Format</b></p>
+                    <p class="leftIndent">
+                        <span id="data-date-formatting-container">
+                            Date Formatting:
+                            <span id="data-date-formatting"></span>
+                        </span>
+                    </p>
+                    <p class="leftIndent">
+                        Number Formatting:
+                    </p>
+                    <p>
+                        Digits:
+                        <input type="text" value="5" size="2" id="data-number-format-digits" />
+                        <select id="data-number-format-style">
+                            <option value="ignore">Ignore</option>
+                            <option value="fixed">Fixed</option>
+                            <option value="precision">Precision</option>
+                            <option value="exponential">Exponential</option>
+                        </select>
+                    </p>
+                    <p>
+                        Column Separator:
+                        <input type="text" value=", " size="2" id="data-number-format-separator" />
+                    </p>
+                    <div class="centered" style="margin-top: 20px;">
+                        <input type="button" value="Format" class="popup-action" onclick="wpd.dataTable.reSortAndFilter();" />
+                    </div>
+                    <br />
+                    <div class="sidebar-tip" style="padding: 5px; margin: 5px;">
+                        <p>
+                            <i class="fa-solid fa-circle-info"></i>
+                            <b>Tip</b>
+                        </p>
+                        <p>
+                            Click <em>Datasets</em> in the sidebar to add additional datasets for export
+                        </p>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- XY Axes Calibration Instructions -->
+<div id="xyAxesInfo" class="popup" style="width:500px;">
+    <div class="popup-heading">
+        <p class="popup-title">Align X-Y Axes</p>
+    </div>
+    <div class="popup-body">
+        <p>&nbsp;</p>
+        <p align="center"><img src="images/xyaxes.png" /></p>
+        <br />
+        <p align="center">Click four <font color="red">known</font> points on the axes in the <font color="red">order shown in red</font>.</p>
+        <p align="center">1. Select two <b>known</b> points on the X axis (X1, X2)</p>
+        <p align="center">2. Select two <b>known</b> points on the Y axis (Y1, Y2)</p>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Proceed' class="popup-action" onclick="wpd.alignAxes.pickCorners();" />
+    </div>
+</div>
+
+<!-- XY Axes Select X1 Instruction -->
+<div id="x1PointInfo" class="popup" style="border: 2px solid black; display: flex; flex-direction: row; box-shadow: 5px 5px 0 0 black;">
+    <p class="popup-heading" style="color: black; background-color: white;">
+        <i class="fa-solid fa-circle-info"></i>
+        Select a known point on the <b>x-axis</b> (X1)
+    </p>
+    <i class="fa-solid fa-xmark" style="padding: 3px 3px 3px 6px; cursor: pointer;" onclick="wpd.popup.close('x1PointInfo');"></i>
+</div>
+
+<!-- XY Axes Select X2 Instruction -->
+<div id="x2PointInfo" class="popup" style="border: 2px solid black; display: flex; flex-direction: row; box-shadow: 5px 5px 0 0 black;">
+    <p class="popup-heading" style="color: black; background-color: white;">
+        <i class="fa-solid fa-circle-info"></i>
+        Select a known second point on the <b>x-axis</b> (X2)
+    </p>
+    <i class="fa-solid fa-xmark" style="padding: 3px 3px 3px 6px; cursor: pointer;" onclick="wpd.popup.close('x2PointInfo');"></i>
+</div>
+
+<!-- XY Axes Select Y1 Instruction -->
+<div id="y1PointInfo" class="popup" style="border: 2px solid black; display: flex; flex-direction: row; box-shadow: 5px 5px 0 0 black;">
+    <p class="popup-heading" style="color: black; background-color: white;">
+        <i class="fa-solid fa-circle-info"></i>
+        Select a known point on the <b>y-axis</b> (Y1)
+    </p>
+    <i class="fa-solid fa-xmark" style="padding: 3px 3px 3px 6px; cursor: pointer;" onclick="wpd.popup.close('y1PointInfo');"></i>
+</div>
+
+<!-- XY Axes Select Y2 Instruction -->
+<div id="y2PointInfo" class="popup" style="border: 2px solid black; display: flex; flex-direction: row; box-shadow: 5px 5px 0 0 black;">
+    <p class="popup-heading" style="color: black; background-color: white;">
+        <i class="fa-solid fa-circle-info"></i>
+        Select a known second point on the <b>y-axis</b> (Y2)
+    </p>
+    <i class="fa-solid fa-xmark" style="padding: 3px 3px 3px 6px; cursor: pointer;" onclick="wpd.popup.close('y2PointInfo');"></i>
+</div>
+
+<!-- Bar Chart Axes Calibration Intructions -->
+<div id="barAxesInfo" class="popup" style="width:650px;">
+    <div class="popup-heading">Align Bar Chart Axes</div>
+    <p>&nbsp;</p>
+    <p align="center"><img src="images/barchart.png" /></p>
+    <p align="center">Click on two known points (P1, P2) on the continuous axes along the bars</p>
+    <p>&nbsp;</p>
+    <p align="center"><input type="button" value="Proceed" onclick="wpd.alignAxes.pickCorners();" /></p>
+</div>
+
+<!-- Map Axes Calibration Instructions -->
+<div id="mapAxesInfo" class="popup" style="width: 350px;">
+    <div class="popup-heading">Align Map To Scale Bar</div>
+    <p>&nbsp;</p>
+    <p align="center"><img src="images/map.png" /></p>
+    <p align="center">Click on the two ends of the scale bar on the map.</p>
+    <p>&nbsp;</p>
+    <p align="center"><input type="button" value="Proceed" onclick="wpd.alignAxes.pickCorners();"></p>
+</div>
+
+<!-- Polar Axes Calibration Instructions -->
+<div id="polarAxesInfo" class="popup" style="width: 350px;">
+    <div class="popup-heading">Align Polar Axes</div>
+    <p>&nbsp;</p>
+    <p align="center"><img src="images/polaraxes.png" /></p>
+    <p align="center">Click on the center, followed by two known points.</p>
+    <p>&nbsp;</p>
+    <p align="center"><input type="button" value="Proceed" onclick="wpd.alignAxes.pickCorners();"></p>
+</div>
+
+<!-- Ternary Axes Calibration Instructions -->
+<div id="ternaryAxesInfo" class="popup" style="width: 350px;">
+    <div class="popup-heading">Align Ternary Axes</div>
+    <p>&nbsp;</p>
+    <p align="center"><img src="images/ternaryaxes.png" /></p>
+    <p align="center">Click on the three corners in the order shown above.</p>
+    <p>&nbsp;</p>
+    <p align="center"><input type="button" value="Proceed" onclick="wpd.alignAxes.pickCorners();"></p>
+</div>
+
+<!-- Circular Chart Recorder Axes Calibration Instructions -->
+<div id="circularChartRecorderAxesInfo" class="popup" style="width: 620px;">
+    <div class="popup-heading">Align Circular Chart Recorder Axes</div>
+    <p>&nbsp;</p>
+    <p align="center"><img src="images/circular_chart_recorder_axes.png" /></p>
+    <p align="left">Click on five (5) points on the chart axes as shown:</p>
+    <p align="left">
+    <ul>
+        <li>First three (3) points at different maginitudes but the same known time (T0).</li>
+        <li>Next two (2) points on any times (T1, T2) but at the same magnitude as R2.</li>
+    </ul>
+    </p>
+    <p>&nbsp;</p>
+    <p align="center"><input type="button" value="Proceed" onclick="wpd.alignAxes.pickCorners();"></p>
+</div>
+
+<!-- About WPD -->
+<div id="helpWindow" class="popup" style="width: 600px;">
+    <div class="popup-heading">
+        <p class="popup-title">WebPlotDigitizer Lite</p>
+        <p class="popup-subtitle">A web-based plot digitizer based off the original WebPlotDigitizer</p>
+    </div>
+    <div class="popup-body">
+        <p>&nbsp;</p>
+        <p align="center">WebPlotDigitizer Lite uses the following version of WebPlotDigitizer:</p>
+        <br />
+        <p align="center">Version 4.7</p>
+        <p align="center">This program is distributed under the <a href='https://www.gnu.org/licenses/agpl-3.0-standalone.html' target='_blank'>GNU Affero General Public License Version 3</a>.</p>
+        <p align="center">Copyright 2010-2022 Ankit Rohatgi &lt;ankitrohatgi@hotmail.com&gt;</p>
+        <p align="center"><a href="https://github.com/ankitrohatgi/WebPlotDigitizer/graphs/contributors" target="_blank">List of Contributors</a></p>
+        <p>&nbsp;</p>
+        <p align="center"><a href="https://automeris.io/WebPlotDigitizer" target="website">https://automeris.io/WebPlotDigitizer</a></p>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Close' class="popup-action" onclick="wpd.popup.close('helpWindow');" />
+    </div>
+</div>
+
+<!-- Color Selection -->
+<div id="color-selection-widget" class="popup" style="width:400px;">
+    <div id="color-selection-title" class="popup-heading">
+        <div class="popup-title">Specify Color</div>
+    </div>
+    <div class="popup-body">
+        <p align="center">&nbsp;</p>
+        <p align="center">
+            Selected Color:
+        </p>
+        <div style="text-align:center;">
+            <div id="color-selection-selected-color-box" class="largeColorBox"></div>
+        </div>
+        <p align="center">&nbsp;</p>
+        <p align="center">
+            <button type="button" class="popup-action" onclick="wpd.colorSelectionWidget.pickColor();">
+                <i class="fa-solid fa-eye-dropper" style="padding-right: 5px;"></i>
+                Color Extractor
+            </button>
+        </p>
+        <p align="center">&nbsp;</p>
+
+        <p align="center">
+            Dominant Colors:
+        </p>
+        <div id="color-selection-options" style="text-align:center;"></div>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Done' class="popup-cancel" onclick="wpd.colorSelectionWidget.setColor(); wpd.algoManager.run();">
+    </div>
+</div>
+
+<!-- Axes Transformation Equations -->
+<div id="axes-transformation-equations-window" class="popup" style="width:600px;">
+    <div class="popup-heading">Transformation Equations</div>
+    <p>The following relationships are being used to convert image pixels to data:</p>
+    <div id="axes-transformation-equation-list"></div>
+    <p>&nbsp;</p>
+    <p align="center"><input type="button" value="Close" onclick="wpd.popup.close('axes-transformation-equations-window');" /></p>
+</div>
+
+<!-- Export JSON -->
+<div id="export-json-window" class="popup" style="width:550px;">
+    <div class="popup-heading">
+        <p class="popup-title">Export JSON</p>
+    </div>
+    <div class="popup-body">
+        <p>Export a JSON file containing the axes calibrations, digitized data and measurements. This JSON file can be loaded to resume work at a later time.</p>
+        <!-- <p>You can also download a combined 'project file' which includes this JSON and also the image in a single TAR file.</p> -->
+        <br />
+        <p align="center">Project Name: <input type="text" value="wpd_project" id="project-name-input" />.json</p>
+        <br />
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('export-json-window');" />
+        <input type="button" value='Download JSON (.json)' class="popup-action" onclick="wpd.saveResume.downloadJSON();" style="margin-right: 10px;" />
+        <!-- <input type="button" value='Download Project File (.tar)' class="popup-action" onclick="wpd.saveResume.downloadProject();" /> -->
+    </div>
+</div>
+
+<!-- Import JSON -->
+<div id="import-json-window" class="popup" style="width:500px;">
+    <div class="popup-heading">
+        <p class="popup-title">Import Project</p>
+        <p class="popup-subtitle">Load a previously exported JSON project file</p>
+    </div>
+    <div class="popup-body">
+        <p>This will clear any unsaved data in the current plot.</p>
+        <p>&nbsp;</p>
+        <p align="center">JSON Project File: <input type="file" id="import-json-file" /></p>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('import-json-window');" />
+        <input type="button" value='Import' class="popup-action" onclick="wpd.saveResume.read();" />
+    </div>
+</div>
+
+<!-- Adjust Data Points Keyboard Shortcuts -->
+<div id="adjust-data-points-keyboard-shortcuts-window" class="popup" style="width:500px;">
+    <div class="popup-heading">
+        <p class="popup-title">Keyboard Shortcuts</p>
+    </div>
+    <div class="popup-body">
+        <p>Click to select a data point. The following keys can then be used to adjust the position:</p>
+        <center>
+            <table cellspacing="5" border="0">
+                <tr>
+                    <td align="right">Cursor (Arrows) -</td>
+                    <td>Move up/down/right/left</td>
+                </tr>
+                <tr>
+                    <td align="right">Shift + Cursor -</td>
+                    <td>Faster rate of movement</td>
+                </tr>
+                <tr>
+                    <td align="right">Q -</td>
+                    <td>Select next point</td>
+                </tr>
+                <tr>
+                    <td align="right">W -</td>
+                    <td>Select previous point</td>
+                </tr>
+                <tr>
+                    <td align="right">Del/Backspace -</td>
+                    <td>Delete point</td>
+                </tr>
+                <tr>
+                    <td align="right">E -</td>
+                    <td>Edit label (Bar Chart)</td>
+                </tr>
+                <tr>
+                    <td align="right" style="vertical-align: top;">R -</td>
+                    <td>
+                        Override value (When adjusting 
+                        <br />
+                        non-Bar Chart points
+                    </td>
+                </tr>
+            </table>
+        </center>
+        <p>&nbsp;</p>
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Close' class="popup-cancel" onclick="wpd.popup.close('adjust-data-points-keyboard-shortcuts-window');" />
+    </div>
+</div>
+
+<!-- Data point label editor -->
+<div id="data-point-label-editor" class="popup" style="width:280px;">
+    <div class="popup-heading">Edit Label</div>
+    <p>&nbsp;</p>
+    <p align="center">Label: <input type="text" value="Data Point" id="data-point-label-field" onkeydown="wpd.dataPointLabelEditor.keydown(event);" /></p>
+    <p>&nbsp;</p>
+    <p align="center">
+        <input type="button" value="OK" onclick="wpd.dataPointLabelEditor.ok();" />
+        <input type="button" value="Cancel" onclick="wpd.dataPointLabelEditor.cancel();" />
+    </p>
+</div>
+
+<!-- Data point value editor -->
+<div id="data-point-value-override-editor" class="popup" style="width:280px;">
+    <div class="popup-heading">Override Point Values</div>
+    <p>&nbsp;</p>
+    <table style="margin-left: 35px;" id="data-point-value-override-editor-table"></table>
+    <p>&nbsp;</p>
+    <p align="center">
+        <input type="hidden" id="data-point-value-override-revert-flag" value="0" />
+        <input type="button" value="OK" onclick="wpd.dataPointValueOverrideEditor.ok();" />
+        <input type="button" value="Cancel" onclick="wpd.dataPointValueOverrideEditor.cancel();" />
+        <input type="button" value="Clear" onclick="wpd.dataPointValueOverrideEditor.clear();" />
+    </p>
+</div>
+
+<!-- Perspective Transform Instructions -->
+<div id="perspective-info" class="popup" style="width:500px;">
+    <div class="popup-heading">Perspective Transformation</div>
+    <p align="center"><img src="images/perspective.png" width="350"></p>
+    <br />
+    <p align="center">Click on four corners of the region to be transformed as shown.</p>
+    <br />
+    <p align="center">
+        <input type="button" value="OK" onclick="wpd.perspective.pickCorners();" />
+        <input type="button" value="Cancel" onclick="wpd.popup.close('perspective-info');" />
+    </p>
+</div>
+
+<!-- Edit or Reset Calibration Dialog -->
+<div id="edit-or-reset-calibration-popup" class="popup" style="width:500px;">
+    <div class="popup-heading">Edit Existing Calibration?</div>
+    <br />
+    <p align="center">Do you wish to tweak existing axes calibration or select a new axes type?</p>
+    <br />
+    <p align="center">
+        <input type="button" value="Edit Calibration" onclick="wpd.alignAxes.reloadCalibrationForEditing();" />
+
+        <input type="button" value="Change Axes Type" onclick="wpd.popup.close('edit-or-reset-calibration-popup');wpd.popup.show('axesList');" />
+
+        <input type="button" value="Cancel" onclick="wpd.popup.close('edit-or-reset-calibration-popup');" />
+    </p>
+</div>
+
+<!-- Export all data dialog -->
+<div id="export-all-data-popup" class="popup" style="width:400px;">
+    <div class="popup-heading">
+        <div class="popup-title">Export All Datasets</div>
+    </div>
+    <div class="popup-body">
+        <p>Export data from all datasets</p>
+        <br />
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('export-all-data-popup');" />
+        <input type="button" value='Download .CSV' class="popup-action" onclick="wpd.dataExport.generateCSV();" />
+        <input type="button" value='Export to Plotly' class="popup-action" onclick="wpd.dataExport.exportToPlotly();" />
+    </div>
+</div>
+
+<!-- Add dataset -->
+<div id="add-dataset-popup" class="popup" style="width:525px;">
+    <div class="popup-heading">
+        <div class="popup-title">Add Dataset</div>
+    </div>
+    <div class="popup-body">
+        <p>
+            Name: 
+            <input type="text" id="add-single-dataset-name-input" value="New Dataset" />
+            <input type="button" value='Add Single Dataset' class="popup-action" onclick="wpd.dataSeriesManagement.addSingleDataset();" />
+        </p>
+        <br />
+        <p>
+            Number of Datasets: 
+            <input type="text" id="add-multiple-datasets-count-input" value="1" />
+            <input type="button" value='Add Multiple Datasets' class="popup-action" onclick="wpd.dataSeriesManagement.addMultipleDatasets();" />
+        </p>
+        <br />
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('add-dataset-popup');" />
+    </div>
+</div>
+
+<!-- Rename dataset -->
+<div id="rename-dataset-popup" class="popup" style="width:400px;">
+    <div class="popup-heading">
+        <div class="popup-title">Rename Dataset</div>
+    </div>
+    <div class="popup-body">
+        <br />
+        <p>Name: <input type="text" id="rename-dataset-name-input" value="Dataset" onkeypress="wpd.dataSeriesManagement.renameKeypress(event);" /></p>
+        <br />
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('rename-dataset-popup');" />
+        <input type="button" value='Rename' class="popup-action" onclick="wpd.dataSeriesManagement.renameDataset();" />
+    </div>
+</div>
+
+<!-- Rename axes labels -->
+<div id="rename-axes-labels-popup" class="popup" style="width:400px;">
+    <div class="popup-heading">
+        <p class="popup-title">Rename Axes Labels</p>
+    </div>
+    <div class="popup-body">
+        <br />
+        <p>X Axis: <input type="text" id="rename-x-axis-input" value="X" onkeypress="wpd.dataSeriesManagement.renameAxesLabelsKeypress(event);" /></p>
+        <p>Y Axis: <input type="text" id="rename-y-axis-input" value="Y" onkeypress="wpd.dataSeriesManagement.renameAxesLabelsKeypress(event);" /></p>
+        <br />
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('rename-axes-labels-popup');" />
+        <input type="button" value='Rename' class="popup-action" onclick="wpd.dataSeriesManagement.renameAxesLabels();" />
+    </div>
+</div>
+
+<!-- Rename axes -->
+<div id="rename-axes-popup" class="popup" style="width:400px;">
+    <div class="popup-heading">
+        <p class="popup-title">Rename Axes</p>
+    </div>
+    <div class="popup-body">
+        <br />
+        <p>Name: <input type="text" id="rename-axes-name-input" value="Axes" onkeypress="wpd.alignAxes.renameKeypress(event);" /></p>
+        <br />
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='Cancel' class="popup-cancel" onclick="wpd.popup.close('rename-axes-popup');" />
+        <input type="button" value='Rename' class="popup-action" onclick="wpd.alignAxes.renameAxes();" />
+    </div>
+</div>
+
+<!-- Image info -->
+<div id="image-info-popup" class="popup" style="width:400px;">
+    <div class="popup-heading">
+        <p class="popup-title">Image Info</p>
+    </div>
+    <div class="popup-body">
+        <br />
+        <p>Dimensions: <span id="image-info-dimensions"></span> pixels</p>
+        <p class="paged" hidden>Pages: <span id="image-info-pages"></span> pages</p>
+        <br />
+    </div>
+    <div class="popup-footer-center">
+        <input type="button" value='OK' class="popup-action" onclick="wpd.popup.close('image-info-popup');" />
+    </div>
+</div>
+
+<!-- Page relabelling -->
+<div id="image-page-relabel-popup" class="popup" style="width:400px;">
+    <div class="popup-heading">Page Labels</div>
+    <p>Relabel the current page number with an alphanumeric string. Optionally, relabel all page numbers in the image based on the current page (only supports integer values).</p>
+    <br />
+    <p>New page label: <input id="image-page-relabel-input" type="text" onkeyup="wpd.appData.getPageManager().validateLabel(this.value)" /></p>
+    <center>
+        <p style="color: lightgray;">
+            <input id="image-page-relabel-all-checkbox" type="checkbox" disabled />
+            <label for="image-page-relabel-all-checkbox">Relabel all pages</label>
+        </p>
+        <br />
+        <p>
+            <input id="image-page-relabel-set-button" type="button" value="Relabel" onclick="wpd.appData.getPageManager().setLabel();" disabled />
+            <input id="image-page-relabel-delete-button" type="button" value="Reset" onclick="wpd.appData.getPageManager().deleteLabel();" disabled />
+            <input id="image-page-relabel-delete-all-button" type="button" value="Reset All" onclick="wpd.appData.getPageManager().deleteLabel(true);" disabled />
+            <input id="image-page-relabel-cancel-button" type="button" value="Cancel" onclick="wpd.popup.close('image-page-relabel-popup');" />
+        </p>
+    </center>
+</div>
+
+<!-- Data point group settings -->
+<div id="point-group-settings-popup" class="popup" style="width: 600px;">
+    <div class="popup-heading">
+        <p class="popup-title">Point Groups</p>
+    </div>
+    <div class="popup-body">
+        <table style="margin: 0 auto;">
+            <tr>
+                <td style="vertical-align: top;">
+                    <p>
+                        Point groups are groups of related data points such as standard error or confidence intervals.
+                    </p>
+                    <br />
+                    <p>
+                        To define a point group, enter a name in the text input below. Create additional point groups as necessary.
+                    </p>
+                    <br />
+                    <p>
+                        E.g. Assume we have 3 point groups defined: Median, Standard error +1, and Standard error -1. Points would be entered in the order shown in the image to the right. For each set of points, the median value would first be recorded, then the standard error +1, and finally the standard error -1. The process would repeat for the next set of points.
+                    </p>
+                </td>
+                <td>
+                    <center>
+                        <img src="images/pointgroups.png" width="300px">
+                    </center>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <br />
+    <table style="margin: 0 auto;">
+        <tbody id="point-group-table">
+            <tr>
+                <td>
+                    Group <span>0</span>:
+                </td>
+                <td>
+                    <input id="point-group-0" placeholder='Primary Group' type="text" />
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+    <br />
+    <div style="text-align: center; margin-bottom: 20px;">
+        <input id="point-group-add-button" type="button" value='Add New Group' class="popup-action" onclick="wpd.pointGroups.addSettingsRow(true);" />
+    </div>
+    <div class="popup-footer-center">
+        <input id="point-group-cancel-button" type="button" value='Cancel' class="popup-cancel" onclick="wpd.pointGroups.closeSettingsPopup();" />
+        <input id="point-group-save-button" type="button" value='Save' class="popup-action" onclick="wpd.pointGroups.saveSettings();" />
+    </div>
+</div>
+
+<!-- Unit testing -->
+
+
+    <!-- strings for translation -->
+    <div class="i18n-string" id="i18n-string-wpd">WebPlotDigitizer</div>
+<div class="i18n-string" id="i18n-string-unstable-version-warning">Unstable version warning!</div>
+<div class="i18n-string" id="i18n-string-unstable-version-warning-text">You are using a beta version of WebPlotDigitizer. There may be some issues with the software that are expected.</div>
+<div class="i18n-string" id="i18n-string-import-json">Import Project</div>
+<div class="i18n-string" id="i18n-string-json-data-loaded">JSON project data has been loaded!</div>
+<div class="i18n-string" id="i18n-string-calibration-invalid-inputs">Invalid Inputs</div>
+<div class="i18n-string" id="i18n-string-calibration-enter-valid">Please enter valid values for calibration.</div>
+<div class="i18n-string" id="i18n-string-calibration-invalid-log-inputs">Invalid Log Scale Value</div>
+<div class="i18n-string" id="i18n-string-calibration-enter-valid-log">Values on a log scale axis can not be zero as log(0) is undefined. Please enter a non-zero value.</div>
+<div class="i18n-string" id="i18n-string-acquire-data">Acquire Data</div>
+<div class="i18n-string" id="i18n-string-acquire-data-calibration">Please calibrate the axes before acquiring data.</div>
+<div class="i18n-string" id="i18n-string-clear-data-points">Clear data points?</div>
+<div class="i18n-string" id="i18n-string-clear-data-points-text">This will delete all data points and point group definitions from this dataset</div>
+<div class="i18n-string" id="i18n-string-webcam-capture">Webcam Capture</div>
+<div class="i18n-string" id="i18n-string-webcam-capture-text">Your browser does not support webcam capture using HTML5 APIs. A recent version of Google Chrome is recommended.</div>
+<div class="i18n-string" id="i18n-string-transformation-eqns">Transformation Equations</div>
+<div class="i18n-string" id="i18n-string-transformation-eqns-text">Transformation equations are available only after axes have been calibrated.</div>
+<div class="i18n-string" id="i18n-string-unsupported">Unsupported Feature!</div>
+<div class="i18n-string" id="i18n-string-unsupported-text">This feature has not been implemented in the current version. This may be available in a future release.</div>
+<div class="i18n-string" id="i18n-string-processing">Processing</div>
+<div class="i18n-string" id="i18n-string-invalid-file">ERROR: Invalid File!</div>
+<div class="i18n-string" id="i18n-string-invalid-file-text">Please load a valid image file. Common image formats such as JPG, PNG, BMP, GIF etc. should work. Word documents are not accepted.</div>
+<div class="i18n-string" id="i18n-string-raw">Raw</div>
+<div class="i18n-string" id="i18n-string-nearest-neighbor">Nearest Neighbor</div>
+<div class="i18n-string" id="i18n-string-all">All</div>
+<div class="i18n-string" id="i18n-string-manage-datasets">Manage Datasets</div>
+<div class="i18n-string" id="i18n-string-manage-datasets-text">Please calibrate the axes before managing datasets.</div>
+<div class="i18n-string" id="i18n-string-delete-dataset">Delete Dataset</div>
+<div class="i18n-string" id="i18n-string-delete-dataset-text">Are you sure you want to delete this dataset?</div>
+<div class="i18n-string" id="i18n-string-delete-associated-datasets">Delete Associated Datasets</div>
+<div class="i18n-string" id="i18n-string-delete-associated-datasets-text">Delete all datasets associated with this axes?</div>
+<div class="i18n-string" id="i18n-string-delete-axes">Delete Axes</div>
+<div class="i18n-string" id="i18n-string-delete-axes-text">Are you sure you want to delete this axes?</div>
+<div class="i18n-string" id="i18n-string-averaging-window">Averaging Window</div>
+<div class="i18n-string" id="i18n-string-x-step-with-interpolation">X Step w/ Interpolation</div>
+<div class="i18n-string" id="i18n-string-custom-independents">Custom Independents</div>
+<div class="i18n-string" id="i18n-string-x-step">X Step</div>
+<div class="i18n-string" id="i18n-string-blob-detector">Blob Detector</div>
+<div class="i18n-string" id="i18n-string-bar-extraction">Bar Extraction</div>
+<div class="i18n-string" id="i18n-string-histogram">Histogram</div>
+<div class="i18n-string" id="i18n-string-specify-data-color">Select a line color for data extraction</div>
+<div class="i18n-string" id="i18n-string-specify-foreground-color">Specify Plot (Foreground) Color</div>
+<div class="i18n-string" id="i18n-string-specify-background-color">Specify Background Color</div>
+<div class="i18n-string" id="i18n-string-no-datasets-to-export">Please add some data before exporting.</div>
+<div class="i18n-string" id="i18n-string-no-datasets-to-export-error">Error: No datasets to export!</div>
+<div class="i18n-string" id="i18n-string-add-dataset-error">Add Dataset Error!</div>
+<div class="i18n-string" id="i18n-string-rename-dataset-error">Rename Dataset Error!</div>
+<div class="i18n-string" id="i18n-string-dataset-exists-error">Dataset with this name already exists. Please pick a different name.</div>
+<div class="i18n-string" id="i18n-string-rename-axes-error">Rename Axes Error!</div>
+<div class="i18n-string" id="i18n-string-axes-exists-error">Axes with this name already exists. Please pick a different name.</div>
+<div class="i18n-string" id="i18n-string-add-dataset-count-error">Specify a valid number of datasets to add!</div>
+<div class="i18n-string" id="i18n-string-dataset">Dataset</div>
+<div class="i18n-string" id="i18n-string-datasets">Datasets</div>
+<div class="i18n-string" id="i18n-string-advanced">Advanced</div>
+<div class="i18n-string" id="i18n-string-measurements">Measurements</div>
+<div class="i18n-string" id="i18n-string-axes">Axes</div>
+<div class="i18n-string" id="i18n-string-distance">Distance</div>
+<div class="i18n-string" id="i18n-string-angle">Angle</div>
+<div class="i18n-string" id="i18n-string-area">Area/Perimeter</div>
+<div class="i18n-string" id="i18n-string-axes-name-xy">XY</div>
+<div class="i18n-string" id="i18n-string-axes-name-image">Image</div>
+<div class="i18n-string" id="i18n-string-axes-name-bar">Bar</div>
+<div class="i18n-string" id="i18n-string-axes-name-polar">Polar</div>
+<div class="i18n-string" id="i18n-string-axes-name-ternary">Ternary</div>
+<div class="i18n-string" id="i18n-string-axes-name-map">Map</div>
+<div class="i18n-string" id="i18n-string-axes-name-circular-chart-recorder">Circular Chart</div>
+<div class="i18n-string" id="i18n-string-project">Project</div>
+<div class="i18n-string" id="i18n-string-distance-measurements">Distance Measurements</div>
+<div class="i18n-string" id="i18n-string-angle-measurements">Angle Measurements</div>
+<div class="i18n-string" id="i18n-string-area-measurements">Area Measurements</div>
+<div class="i18n-string" id="i18n-string-dataset-no-calibration">Uncalibrated Dataset!</div>
+<div class="i18n-string" id="i18n-string-calibrate-dataset">Assign an axes calibration to this dataset!</div>
+<div class="i18n-string" id="i18n-string-invalid-project">Invalid Project!</div>
+<div class="i18n-string" id="i18n-string-invalid-project-msg">Not a valid project file format!</div>
+<div class="i18n-string" id="i18n-string-image">Image</div>
+<div class="i18n-string" id="i18n-string-image-of">of</div>
+<div class="i18n-string" id="i18n-string-image-page">Page</div>
+<div class="i18n-string" id="i18n-string-ok">OK</div>
+<div class="i18n-string" id="i18n-string-cancel">Cancel</div>
+<div class="i18n-string" id="i18n-string-yes">Yes</div>
+<div class="i18n-string" id="i18n-string-no">No</div>
+<div class="i18n-string" id="i18n-string-tuple-delete-title">Delete Point Tuple</div>
+<div class="i18n-string" id="i18n-string-tuple-delete-text">Delete all points in the tuple?</div>
+<div class="i18n-string" id="i18n-string-group-delete-title">Delete Group</div>
+<div class="i18n-string" id="i18n-string-group-delete-text">Delete all points in deleted groups?</div>
+<div class="i18n-string" id="i18n-string-point-group-group">Group</div>
+<div class="i18n-string" id="i18n-string-point-group-delete-group">Delete Group</div>
+<div class="i18n-string" id="i18n-string-point-group-primary-group">Primary Group</div>
+<div class="i18n-string" id="i18n-string-point-group-new-tuple">new tuple</div>
+
+</body>
+
+</html>
