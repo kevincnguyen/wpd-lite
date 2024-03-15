@@ -473,3 +473,290 @@ label {
 .fa-chart-line {
     margin-right: 2px;
 }
+
+/* Generic Menus */
+
+.wpd-menu {
+    font-size: 14px;
+    display: inline-block;
+    position: relative;
+    cursor: default;
+}
+
+.wpd-menu:hover>.wpd-menu-dropdown {
+    visibility: visible;
+    z-index: 50;
+}
+
+.wpd-menu:hover>.wpd-menu-header,
+.wpd-menu-dropdown>ul>li:hover {
+    background: var(--highlight-hover);
+}
+
+.wpd-menu-dropdown>ul>li:active {
+    background-color: var(--highlight);
+}
+
+.wpd-menu-header {
+    position: relative;
+    padding: 5px;
+    height: 18px;
+}
+
+.wpd-menu-dropdown {
+    visibility: hidden;
+    display: inline-block;
+    position: absolute;
+    background: white;
+    padding: 0px;
+}
+
+.wpd-menu-dropdown>ul {
+    list-style: none;
+    list-style-type: none;
+    padding: 1px;
+    margin: 0px;
+    white-space: nowrap;
+    border: thin #ccc solid;
+}
+
+.wpd-menu-dropdown>ul>li {
+    padding: 3px 8px 3px 8px;
+}
+
+.wpd-disabled-menu-item {
+    color: grey;
+}
+
+
+textarea {
+    resize: none;
+}
+
+input[type="button"],
+button {
+    font-family: 'Roboto', Verdana, sans-serif;
+    padding: 2px 3px 2px 3px;
+    font-size: 13px;
+    font-weight: 500;
+    color: black;
+    background-color: #f1f1f1;
+    border: thin #bbbbbb solid;
+    height: 22px;
+    margin: 0px;
+    cursor: pointer;
+}
+
+input[type="button"]:hover,
+button:hover {
+    background-color: var(--highlight-hover);
+    border: thin black solid;
+}
+
+input[type="button"]:active,
+button:active {
+    background-color: var(--highlight) !important;
+}
+
+input[type="button"].pressed-button,
+button.pressed-button {
+    background-color: var(--highlight) !important;
+}
+
+input[type="button"].popup-cancel,
+button.popup-cancel {
+    padding: 8px 12px;
+    min-width: 75px;
+    color: black;
+    background-color: white;
+    border-radius: 5px;
+    margin-right: 10px;
+    height: auto;
+}
+
+input[type="button"].popup-action,
+button.popup-action {
+    padding: 8px 12px;
+    min-width: 75px;
+    color: white;
+    background-color: var(--primary-color);
+    border-radius: 5px;
+    height: auto;
+}
+
+input[type="button"].popup-cancel:hover,
+button.popup-cancel:hover {
+    border: thin black solid;
+    background-color: var(--gray);
+}
+
+input[type="button"].popup-action:hover,
+button.popup-action:hover {
+    border: thin black solid;
+    background-color: var(--secondary-color);
+}
+
+input[type="button"].sidebar-button,
+button.sidebar-button {
+    color: black;
+    background-color: white;
+    border: thin black solid;
+    height: auto;
+    min-width: 75px;
+    padding: 10px;
+}
+
+input[type="button"].sidebar-button:hover,
+button.sidebar-button:hover {
+    background-color: var(--highlight-hover);
+}
+
+input[type="button"].sidebar-button:active,
+button.sidebar-button:active {
+    background-color: var(--highlight);
+}
+
+input[type="button"]:focus,
+button:focus {
+    outline-width: 0;
+}
+
+input[type="button"]:disabled {
+    color: grey;
+}
+
+/* Sort of a hack to make button look right in Firefox */
+input[type="button"]::-moz-focus-inner {
+    margin-top: -1px;
+}
+
+input[type="checkbox"] {
+    height: 20px;
+    width: 20px;
+    border: thin black solid;
+    background: white;
+}
+
+input[type="text"] {
+    font-family: Verdana, Sans Serif;
+    font-size: 13px;
+    background: white;
+    border: thin #aaaaaa solid;
+    height: 17px;
+}
+
+input[type="range"] {
+    height: 13px;
+    background: white;
+    border: thin lightgrey solid;
+}
+
+input[type=range]::-moz-range-track {
+    background: grey;
+}
+
+input[type="file"] {
+    font-size: 14px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+    appearance: auto;
+}
+
+hr {
+    height: 1px;
+    border: none;
+    background-color: #dddddd;
+}
+
+select {
+    border: none;
+}
+
+/* Left Sidebar Styles */
+
+.tree-item {
+    cursor: pointer;
+    padding: 10px;
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.tree-folder {
+    cursor: pointer;
+    padding: 10px;
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.tree-list {
+    list-style: none;
+    padding-left: 15px;
+    font-family: sans-serif;
+    font-size: 11pt;
+}
+
+.tree-list .tree-item {
+    width: 100%;
+}
+
+.tree-list-root {
+    list-style: none;
+    padding-left: 1px;
+    font-family: sans-serif;
+    font-size: 11pt;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.tree-item:hover,
+.tree-folder:hover {
+    background: var(--highlight-hover);
+}
+
+.tree-selected {
+    background: var(--highlight);
+}
+
+.tree-selected:hover {
+    background: var(--highlight);
+}
+
+.tree-item:active,
+.tree-folder:active,
+.tree-item::selection {
+    background: var(--highlight);
+}
+
+.tree-widget {
+    display: none;
+    font-size: 13px;
+}
+
+.tree-widget p {
+    margin: 5px 0px 5px 0px;
+}
+
+.tree-item-icon {
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    display: inline-block;
+    margin-right: 3px;
+}
+
+.tree-menu-icon {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    margin-right: 8px;
+}
