@@ -44,6 +44,7 @@
     <!-- thirdparty -->
     <script src="https://kit.fontawesome.com/6b7d6b5ea1.js" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
 </head>
 
 <body>
@@ -713,7 +714,7 @@
     </div>
     <div class="popup-body">
         <p>Supported file formats:</p>
-        <p>JPEG, PNG, SVG, GIF, BMP, WebP, etc.</p>
+        <p>JPEG, PNG, PDF, SVG, GIF, BMP, WebP, etc.</p>
         <p>&nbsp;</p>
         <p align="center"><input type="file" id="fileLoadBox" multiple onchange="wpd.imageManager.load(false);" /></p>
         <p>&nbsp;</p>
@@ -1664,8 +1665,8 @@
 <div class="i18n-string" id="i18n-string-unsupported">Unsupported Feature!</div>
 <div class="i18n-string" id="i18n-string-unsupported-text">This feature has not been implemented in the current version. This may be available in a future release.</div>
 <div class="i18n-string" id="i18n-string-processing">Processing</div>
-<div class="i18n-string" id="i18n-string-invalid-file">ERROR: Invalid File!</div>
-<div class="i18n-string" id="i18n-string-invalid-file-text">Please load a valid image file. Common image formats such as JPG, PNG, BMP, GIF etc. should work. Word documents are not accepted.</div>
+<div class="i18n-string" id="i18n-string-invalid-file">ERROR: Invalid File</div>
+<div class="i18n-string" id="i18n-string-invalid-file-text">Please load a valid file such as JPG, PNG, PDF, SVG, GIF, BMP, WebP, etc. Word documents are not supported.</div>
 <div class="i18n-string" id="i18n-string-raw">Raw</div>
 <div class="i18n-string" id="i18n-string-nearest-neighbor">Nearest Neighbor</div>
 <div class="i18n-string" id="i18n-string-all">All</div>
